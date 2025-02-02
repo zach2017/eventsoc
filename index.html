@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Events Listing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .filters {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+        }
+        .filter-btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .date-input {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .clear-date {
+            padding: 8px 16px;
+            border: none;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .event-card {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .event-title {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .event-meta {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .event-description {
+            color: #444;
+            margin-bottom: 15px;
+        }
+        .learn-more {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .event-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            float: right;
+        }
+        .no-events {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upcoming Sports Events</h1>
+    
+    <div class="filters">
+        <div style="margin-bottom: 15px;">
+            <input type="date" id="dateFilter" class="date-input">
+            <button id="clearDate" class="clear-date" style="display: none;">Clear Date</button>
+        </div>
+        <button class="filter-btn active" data-type="all">All Events</button>
+        <button class="filter-btn" data-type="tennis">Tennis</button>
+        <button class="filter-btn" data-type="pickleball">Pickleball</button>
+        <button class="filter-btn" data-type="volleyball">Volleyball</button>
+    </div>
+
+    <div id="eventsList"></div>
+
+    <script>
+        const eventsData = [
+            {
+                id: 1,
+                date: "02/15/2025",
+                title: "Spring Tennis Championship",
+                type: "tennis",
+                location: "Central Court Arena",
+                link: "/tennis-championship",
+                description: "Annual tennis championship featuring both singles and doubles matches. Open to all skill levels."
+            },
+            {
+                id: 2,
+                date: "02/20/2025",
+                title: "Pickleball Tournament Series",
+                type: "pickleball",
+                location: "Community Sports Center",
+                link: "/pickleball-series",
+                description: "Monthly pickleball tournament with rotating partners. Great for networking and improving your game."
+            },
+            {
+                id: 3,
+                date: "03/01/2025",
+                title: "Beach Volleyball Classic",
+                type: "volleyball",
+                location: "Sunset Beach Courts",
+                link: "/volleyball-classic",
+                description: "Weekend beach volleyball tournament with professional exhibition matches."
+            },
+            {
+                id: 4,
+                date: "03/10/2025",
+                title: "Mixed Doubles Tennis Open",
+                type: "tennis",
+                location: "Tennis Club East",
+                link: "/mixed-doubles",
+                description: "Mixed doubles tournament with prize pool and refreshments provided."
+            },
+            {
+                id: 5,
+                date: "03/15/2025",
+                title: "Pickleball Skills Workshop",
+                type: "pickleball",
+                location: "Indoor Sports Complex",
+                link: "/pickleball-workshop",
+                description: "Learn advanced pickleball techniques from certified instructors."
+            },
+            {
+                id: 6,
+                date: "03/25/2025",
+                title: "Indoor Volleyball League",
+                type: "volleyball",
+                location: "Sports Center West",
+                link: "/volleyball-league",
+                description: "8-week indoor volleyball league with divisions for all skill levels."
+            }
+        ];
+
+        let currentFilter = 'all';
+        let selectedDate = '';
+
+        function formatDateForDisplay(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatDateForHover(dateStr) {
+            // This gives the full date format for hover/tooltip
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function isSameDate(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
+        function renderEvents() {
+            const eventsListDiv = document.getElementById('eventsList');
+            
+            const filteredEvents = eventsData.filter(event => {
+                const matchesType = currentFilter === 'all' || event.type === currentFilter;
+                const matchesDate = !selectedDate || isSameDate(event.date, selectedDate);
+                return matchesType && matchesDate;
+            });
+
+            if (filteredEvents.length === 0) {
+                eventsListDiv.innerHTML = '<div class="no-events">No events found for the selected filters</div>';
+                return;
+            }
+
+            eventsListDiv.innerHTML = filteredEvents.map(event => `
+                <div class="event-card">
+                    <span class="event-type">${event.type}</span>
+                    <h2 class="event-title">${event.title}</h2>
+                    <div class="event-meta">
+                        <div title="${formatDateForHover(event.date)}">📅 ${formatDateForDisplay(event.date)}</div>
+                        <div>📍 ${event.location}</div>
+                    </div>
+                    <p class="event-description">${event.description}</p>
+                    <a href="${event.link}" class="learn-more">Learn More</a>
+                </div>
+            `).join('');
+        }
+
+        function convertDateFormat(dateStr) {
+            // Convert from MM/DD/YYYY to YYYY-MM-DD for input type="date"
+            const [month, day, year] = dateStr.split('/');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Update active button
+                document.querySelector('.filter-btn.active').classList.remove('active');
+                e.target.classList.add('active');
+                
+                // Update filter and render
+                currentFilter = e.target.dataset.type;
+                renderEvents();
+            });
+        });
+
+        const dateFilter = document.getElementById('dateFilter');
+        const clearDateBtn = document.getElementById('clearDate');
+
+        dateFilter.addEventListener('change', (e) => {
+            // Convert the date from YYYY-MM-DD to MM/DD/YYYY for filtering
+            if (e.target.value) {
+                const [year, month, day] = e.target.value.split('-');
+                selectedDate = `${month}/${day}/${year}`;
+            } else {
+                selectedDate = '';
+            }
+            clearDateBtn.style.display = selectedDate ? 'inline-block' : 'none';
+            renderEvents();
+        });
+
+        clearDateBtn.addEventListener('click', () => {
+            dateFilter.value = '';
+            selectedDate = '';
+            clearDateBtn.style.display = 'none';
+            renderEvents();
+        });
+
+        // Initial render
+        renderEvents();
+    </script>
+</body>
+</html>
