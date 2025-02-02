@@ -6,7 +6,7 @@
         "title": "Spring Tennis Championship",
         "type": "tennis",
         "location": "Central Court Arena",
-        "link": "/tennis-championship",
+        "link": "soon.html",
         "description": "Annual tennis championship featuring both singles and doubles matches. Open to all skill levels."
       },
       {
@@ -15,7 +15,7 @@
         "title": "Pickleball Tournament Series",
         "type": "pickleball",
         "location": "Community Sports Center",
-        "link": "/pickleball-series",
+        "link": "soon.html",
         "description": "Monthly pickleball tournament with rotating partners. Great for networking and improving your game."
       },
       {
@@ -24,7 +24,7 @@
         "title": "Beach Volleyball Classic",
         "type": "volleyball",
         "location": "Sunset Beach Courts",
-        "link": "/volleyball-classic",
+        "link": "soon.html",
         "description": "Weekend beach volleyball tournament with professional exhibition matches."
       },
       {
@@ -33,7 +33,7 @@
         "title": "Mixed Doubles Tennis Open",
         "type": "tennis",
         "location": "Tennis Club East",
-        "link": "/mixed-doubles",
+        "link": "soon.html",
         "description": "Mixed doubles tournament with prize pool and refreshments provided."
       },
       {
@@ -42,7 +42,7 @@
         "title": "Pickleball Skills Workshop",
         "type": "pickleball",
         "location": "Indoor Sports Complex",
-        "link": "/pickleball-workshop",
+        "link": "soon.html",
         "description": "Learn advanced pickleball techniques from certified instructors."
       },
       {
@@ -51,7 +51,7 @@
         "title": "Indoor Volleyball League",
         "type": "volleyball",
         "location": "Sports Center West",
-        "link": "/volleyball-league",
+        "link": "soon.html",
         "description": "8-week indoor volleyball league with divisions for all skill levels."
       }
     ]
