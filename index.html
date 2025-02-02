@@ -22,10 +22,15 @@
         .filter-btn {
             padding: 8px 16px;
             margin-right: 10px;
+            margin-bottom: 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             background-color: #e0e0e0;
+            transition: background-color 0.2s;
+        }
+        .filter-btn:hover {
+            background-color: #d0d0d0;
         }
         .filter-btn.active {
             background-color: #007bff;
@@ -39,10 +44,14 @@
         }
         .clear-date {
             padding: 8px 16px;
-            border: none;
+            border: 1px solid #ddd;
             background-color: #f8f9fa;
             cursor: pointer;
             border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .clear-date:hover {
+            background-color: #e9ecef;
         }
         .event-card {
             background-color: white;
@@ -50,6 +59,10 @@
             margin-bottom: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .event-card:hover {
+            transform: translateY(-2px);
         }
         .event-title {
             margin: 0 0 10px 0;
@@ -62,6 +75,7 @@
         .event-description {
             color: #444;
             margin-bottom: 15px;
+            line-height: 1.5;
         }
         .learn-more {
             display: inline-block;
@@ -70,6 +84,10 @@
             color: white;
             text-decoration: none;
             border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .learn-more:hover {
+            background-color: #0056b3;
         }
         .event-type {
             display: inline-block;
@@ -79,12 +97,41 @@
             font-size: 0.875rem;
             float: right;
         }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
         .no-events {
             text-align: center;
             padding: 40px;
+            color: #666;
             background-color: white;
             border-radius: 8px;
-            color: #666;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .filters {
+                display: flex;
+                flex-direction: column;
+            }
+            .filter-btn {
+                margin-bottom: 8px;
+            }
+            .date-input {
+                width: 100%;
+                margin-bottom: 8px;
+            }
         }
     </style>
 </head>
@@ -102,65 +149,11 @@
         <button class="filter-btn" data-type="volleyball">Volleyball</button>
     </div>
 
+    <div id="loadingMessage" class="loading">Loading events...</div>
     <div id="eventsList"></div>
 
     <script>
-        const eventsData = [
-            {
-                id: 1,
-                date: "02/15/2025",
-                title: "Spring Tennis Championship",
-                type: "tennis",
-                location: "Central Court Arena",
-                link: "/tennis-championship",
-                description: "Annual tennis championship featuring both singles and doubles matches. Open to all skill levels."
-            },
-            {
-                id: 2,
-                date: "02/20/2025",
-                title: "Pickleball Tournament Series",
-                type: "pickleball",
-                location: "Community Sports Center",
-                link: "/pickleball-series",
-                description: "Monthly pickleball tournament with rotating partners. Great for networking and improving your game."
-            },
-            {
-                id: 3,
-                date: "03/01/2025",
-                title: "Beach Volleyball Classic",
-                type: "volleyball",
-                location: "Sunset Beach Courts",
-                link: "/volleyball-classic",
-                description: "Weekend beach volleyball tournament with professional exhibition matches."
-            },
-            {
-                id: 4,
-                date: "03/10/2025",
-                title: "Mixed Doubles Tennis Open",
-                type: "tennis",
-                location: "Tennis Club East",
-                link: "/mixed-doubles",
-                description: "Mixed doubles tournament with prize pool and refreshments provided."
-            },
-            {
-                id: 5,
-                date: "03/15/2025",
-                title: "Pickleball Skills Workshop",
-                type: "pickleball",
-                location: "Indoor Sports Complex",
-                link: "/pickleball-workshop",
-                description: "Learn advanced pickleball techniques from certified instructors."
-            },
-            {
-                id: 6,
-                date: "03/25/2025",
-                title: "Indoor Volleyball League",
-                type: "volleyball",
-                location: "Sports Center West",
-                link: "/volleyball-league",
-                description: "8-week indoor volleyball league with divisions for all skill levels."
-            }
-        ];
+        let eventsData = [];
 
         let currentFilter = 'all';
         let selectedDate = '';
@@ -175,7 +168,6 @@
         }
 
         function formatDateForHover(dateStr) {
-            // This gives the full date format for hover/tooltip
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', { 
                 weekday: 'long', 
@@ -196,8 +188,13 @@
         function renderEvents() {
             const eventsListDiv = document.getElementById('eventsList');
             
+            if (!eventsData || eventsData.length === 0) {
+                eventsListDiv.innerHTML = '<div class="no-events">No events available at this time</div>';
+                return;
+            }
+
             const filteredEvents = eventsData.filter(event => {
-                const matchesType = currentFilter === 'all' || event.type === currentFilter;
+                const matchesType = currentFilter === 'all' || event.type.toLowerCase() === currentFilter.toLowerCase();
                 const matchesDate = !selectedDate || isSameDate(event.date, selectedDate);
                 return matchesType && matchesDate;
             });
@@ -216,25 +213,16 @@
                         <div>📍 ${event.location}</div>
                     </div>
                     <p class="event-description">${event.description}</p>
-                    <a href="${event.link}" class="learn-more">Learn More</a>
+                    <a href="${event.link}" class="learn-more" target="_blank" rel="noopener noreferrer">Learn More</a>
                 </div>
             `).join('');
-        }
-
-        function convertDateFormat(dateStr) {
-            // Convert from MM/DD/YYYY to YYYY-MM-DD for input type="date"
-            const [month, day, year] = dateStr.split('/');
-            return `${year}-${month}-${day}`;
         }
 
         // Event Listeners
         document.querySelectorAll('.filter-btn').forEach(button => {
             button.addEventListener('click', (e) => {
-                // Update active button
                 document.querySelector('.filter-btn.active').classList.remove('active');
                 e.target.classList.add('active');
-                
-                // Update filter and render
                 currentFilter = e.target.dataset.type;
                 renderEvents();
             });
@@ -244,14 +232,14 @@
         const clearDateBtn = document.getElementById('clearDate');
 
         dateFilter.addEventListener('change', (e) => {
-            // Convert the date from YYYY-MM-DD to MM/DD/YYYY for filtering
             if (e.target.value) {
                 const [year, month, day] = e.target.value.split('-');
                 selectedDate = `${month}/${day}/${year}`;
+                clearDateBtn.style.display = 'inline-block';
             } else {
                 selectedDate = '';
+                clearDateBtn.style.display = 'none';
             }
-            clearDateBtn.style.display = selectedDate ? 'inline-block' : 'none';
             renderEvents();
         });
 
@@ -262,8 +250,41 @@
             renderEvents();
         });
 
-        // Initial render
-        renderEvents();
+        async function loadEventsData() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            const eventsListDiv = document.getElementById('eventsList');
+
+            try {
+                loadingMessage.style.display = 'block';
+                eventsListDiv.style.display = 'none';
+
+                const response = await fetch('https://eventsonec.tiiny.site/events.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (!data || !Array.isArray(data.events)) {
+                    throw new Error('Invalid data format received');
+                }
+
+                eventsData = data.events;
+                loadingMessage.style.display = 'none';
+                eventsListDiv.style.display = 'block';
+                renderEvents();
+            } catch (error) {
+                console.error('Error loading events:', error);
+                loadingMessage.innerHTML = `
+                    <div class="error-message">
+                        <strong>Unable to load events</strong><br>
+                        Please try refreshing the page. If the problem persists, contact support.<br>
+                        <small>Error details: ${error.message}</small>
+                    </div>`;
+            }
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', loadEventsData);
     </script>
 </body>
 </html>
